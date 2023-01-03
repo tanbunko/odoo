@@ -8,8 +8,8 @@
 # RHTodoo, 2021
 # Sebastien LANGE, 2021
 # Thomas Deleval <thd@odoo.com>, 2021
-# Martin Trigaux, 2022
 # Cécile Collart <cco@odoo.com>, 2022
+# Martin Trigaux, 2022
 # Jolien De Paepe, 2022
 # 
 msgid ""
@@ -156,7 +156,7 @@ msgstr "&gt;"
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_inventory
 msgid "'Count Sheet'"
-msgstr "Feuille de comptage"
+msgstr "'Feuille de comptage'"
 
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_delivery
@@ -1408,6 +1408,8 @@ msgstr "Choisir un meilleur nom"
 #, python-format
 msgid "Changing %s is restricted, you can't do this operation."
 msgstr ""
+"Le changement de %s n'est pas autorisé, vous ne pouvez pas réaliser cette "
+"opération."
 
 #. module: stock
 #: code:addons/stock/models/product_strategy.py:0

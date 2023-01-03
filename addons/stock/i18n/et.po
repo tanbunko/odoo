@@ -156,7 +156,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 #: model_terms:ir.ui.view,arch_db:stock.view_immediate_transfer
 msgid "&gt;"
-msgstr ""
+msgstr "&gt;"
 
 #. module: stock
 #: model:ir.actions.report,print_report_name:stock.action_report_inventory
@@ -7295,7 +7295,7 @@ msgstr "Laosiirded, mis on töödeldud"
 #. module: stock
 #: model:ir.model,name:stock.model_stock_package_type
 msgid "Stock package type"
-msgstr ""
+msgstr "Ladusta pakendi tüüp"
 
 #. module: stock
 #: model:ir.model,name:stock.model_report_stock_report_stock_rule

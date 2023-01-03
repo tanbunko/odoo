@@ -311,7 +311,7 @@ odoo.define('pos_coupon.pos', function (require) {
         },
         _getRegularOrderlines: function () {
             const orderlines = _order_super.get_orderlines.apply(this, arguments);
-            return orderlines.filter((line) => !line.is_program_reward && !line.refunded_orderline_id);
+            return orderlines.filter((line) => !line.is_program_reward && !line.refunded_orderline_id && (!this.pos.config.discount_product_id || line.product.id !== this.pos.config.discount_product_id[0]));
         },
         _getRewardLines: function () {
             const orderlines = _order_super.get_orderlines.apply(this, arguments);
@@ -338,6 +338,11 @@ odoo.define('pos_coupon.pos', function (require) {
                 .apply(this, arguments)
                 .filter((line) => !line.is_program_reward);
             return regularLines[regularLines.length - 1];
+        },
+        selectLastOrderline: function(line){
+            if(!line.is_program_reward) {
+                _order_super.selectLastOrderline.apply(this, arguments);
+            }
         },
         set_pricelist: function (pricelist) {
             _order_super.set_pricelist.apply(this, arguments);

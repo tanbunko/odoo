@@ -1136,6 +1136,12 @@ msgstr ""
 "                트랜잭션을 기록하는 데 사용합니다."
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "A line of this move is using a deprecated account, you cannot post it."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "A payment must always belongs to a bank or cash journal."
@@ -4547,12 +4553,12 @@ msgstr "당기 순이익"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Cust. Payment"
-msgstr ""
+msgstr "고객 지불"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Cust. Payments"
-msgstr ""
+msgstr "고객 지불"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment__partner_type__customer
@@ -7980,12 +7986,12 @@ msgstr "지연된 활동"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Late Bills"
-msgstr ""
+msgstr "공급업체 청구서 연체 내역"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Late Invoices"
-msgstr ""
+msgstr "청구서 연체 내역"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__last_time_entries_checked
@@ -9922,6 +9928,15 @@ msgstr "‘분개’ 필드가 예금거래 명세서에 설정되어 있는지 
 #, python-format
 msgid "Please check that the field 'Transfer Account' is set on the company."
 msgstr "회사에 ‘이전 계정’ 필드가 설정되어 있는지 확인해 주십시오."
+
+#. module: account
+#: code:addons/account/models/chart_template.py:0
+#, python-format
+msgid ""
+"Please check these taxes. They might be outdated. We did not update them. "
+"Indeed, they do not exactly match the taxes of the original version of the "
+"localization module.<br/>You might want to archive or adapt them.<br/><ul>"
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/account_payment.py:0
@@ -13547,6 +13562,14 @@ msgid "The payment's currency."
 msgstr ""
 
 #. module: account
+#: code:addons/account/models/product.py:0
+#, python-format
+msgid ""
+"The product \"%s\" is used in invoices. You cannot change its Unit of "
+"Measure."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid ""
@@ -15653,6 +15676,12 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_default_terms_and_conditions
 msgid "You should update this document to reflect your T&amp;C."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/chart_template.py:0
+#, python-format
+msgid "Your taxes have been updated !"
 msgstr ""
 
 #. module: account

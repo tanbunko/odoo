@@ -10,12 +10,12 @@
 # Yann Papouin <ypa@decgroupe.com>, 2021
 # Thomas Deleval <thd@odoo.com>, 2021
 # Grégory Schreiner <gregory@mokatourisme.fr>, 2021
-# Martin Trigaux, 2022
 # Desausoi Laurent, 2022
 # Moka Tourisme <hello@mokatourisme.fr>, 2022
 # Camille Dantinne <cmd@odoo.com>, 2022
 # Cécile Collart <cco@odoo.com>, 2022
 # Walid Hanniche, 2022
+# Martin Trigaux, 2022
 # Jolien De Paepe, 2022
 # 
 msgid ""
@@ -37,7 +37,7 @@ msgstr ""
 #: code:addons/sale/static/src/js/sale.js:0
 #, python-format
 msgid " / Month"
-msgstr ""
+msgstr " / Mois"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_payment_acquirer_onboarding_wizard___data_fetched
@@ -4845,8 +4845,8 @@ msgid ""
 " }})"
 msgstr ""
 "{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state "
-"== 'en attente') and 'Commande en attente' or 'Commande' }} (Ref {{ "
-"object.name or 'n/a' }})"
+"== 'pending') and 'Commande en attente' or 'Commande' }} (Ref {{ object.name"
+" or 'n/a' }})"
 
 #. module: sale
 #: model:mail.template,subject:sale.email_template_edi_sale
