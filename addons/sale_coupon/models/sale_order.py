@@ -156,6 +156,10 @@ class SaleOrder(models.Model):
         # This allow manual overwrite of taxes for promotion.
         if program.discount_line_product_id.taxes_id:
             line_taxes = self.fiscal_position_id.map_tax(program.discount_line_product_id.taxes_id) if self.fiscal_position_id else program.discount_line_product_id.taxes_id
+            lines = self._get_base_order_lines(program)
+            discount_amount = min(
+                sum(lines.mapped(lambda l: l.price_reduce * l.product_uom_qty)), discount_amount
+            )
             return [{
                 'name': _("Discount: %s", program.name),
                 'product_id': program.discount_line_product_id.id,
@@ -290,10 +294,15 @@ class SaleOrder(models.Model):
         self.ensure_one()
         self = self.with_context(lang=self.partner_id.lang)
         program = program.with_context(lang=self.partner_id.lang)
+        values = []
         if program.reward_type == 'discount':
-            return self._get_reward_values_discount(program)
+            values = self._get_reward_values_discount(program)
         elif program.reward_type == 'product':
-            return [self._get_reward_values_product(program)]
+            values = [self._get_reward_values_product(program)]
+        seq = max(self.order_line.mapped('sequence'), default=10) + 1
+        for value in values:
+            value['sequence'] = seq
+        return values
 
     def _create_reward_line(self, program):
         self.write({'order_line': [(0, False, value) for value in self._get_reward_line_values(program)]})

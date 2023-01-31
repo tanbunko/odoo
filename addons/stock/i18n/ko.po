@@ -3389,6 +3389,13 @@ msgid "Invalid domain right operand %s"
 msgstr "잘못된 도메인 오른쪽 피연산자 %s"
 
 #. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"Invalid rule's configuration, the following rule causes an endless loop: %s"
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant__inventory_quantity_auto_apply
 msgid "Inventoried Quantity"
 msgstr "재고 수량"
@@ -7778,6 +7785,14 @@ msgstr ""
 "방법은 품목을 보관하고 대신 신규 품목을 만드는 것입니다."
 
 #. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product's company cannot be changed as long as there are quantities of "
+"it belonging to another company."
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields,help:stock.field_stock_change_product_qty__new_quantity
 msgid ""
 "This quantity is expressed in the Default Unit of Measure of the product."
@@ -8897,6 +8912,12 @@ msgid "You cannot unreserve a stock move that has been set to 'Done'."
 msgstr "'완료'로 설정된 재고 이동을 예약 해제할 수 없습니다."
 
 #. module: stock
+#: code:addons/stock/models/stock_move.py:0
+#, python-format
+msgid "You cannot change a cancelled stock move, create a new line instead."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_move_line.py:0
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
@@ -9210,4 +9231,11 @@ msgstr "{{ (object.name or '').replace('/','_') }}"
 #: model:mail.template,subject:stock.mail_template_data_delivery_confirmation
 msgid ""
 "{{ object.company_id.name }} Delivery Order (Ref {{ object.name or 'n/a' }})"
+msgstr ""
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_rule.py:0
+#, python-format
+msgid "Global Visibility Days"
 msgstr ""
