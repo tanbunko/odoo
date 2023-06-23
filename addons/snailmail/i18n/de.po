@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2022
+# Stefan Reisich <nafex@gmx.net>, 2023
 # Larissa Manderfeld, 2023
 # 
 msgid ""
@@ -150,7 +151,7 @@ msgstr "Stadt"
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_missing_required_fields
 #, python-format
 msgid "Close"
-msgstr "Abschließen"
+msgstr "Schließen"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_res_company__snailmail_color
@@ -291,7 +292,7 @@ msgstr "Information"
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "Invalid recipient name."
-msgstr ""
+msgstr "Ungültige Empfängername"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter____last_update
@@ -481,7 +482,7 @@ msgstr "Gesendet von"
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "Snail Mails are successfully sent"
-msgstr ""
+msgstr "Postbriefe wurden erfolgreich versandt"
 
 #. module: snailmail
 #. odoo-python
@@ -549,7 +550,7 @@ msgstr "Briefpost Statusnachricht"
 #. module: snailmail
 #: model:ir.model.fields.selection,name:snailmail.selection__mail_notification__failure_type__sn_trial
 msgid "Snailmail Trial Error"
-msgstr ""
+msgstr "Briefpost Versuchsfehler"
 
 #. module: snailmail
 #: model:ir.model.fields.selection,name:snailmail.selection__mail_notification__failure_type__sn_error

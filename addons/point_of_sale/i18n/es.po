@@ -729,7 +729,7 @@ msgstr "Lo antes posible"
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__res_company__point_of_sale_update_stock_quantities__closing
 msgid "At the session closing (faster)"
-msgstr ""
+msgstr "Al cierre de la sesión (más rápido)"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_res_company__point_of_sale_update_stock_quantities
@@ -2700,7 +2700,7 @@ msgstr "Para eliminar una venta, ésta debe ser nueva o cancelada"
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__res_company__point_of_sale_update_stock_quantities__real
 msgid "In real time (accurate but slower)"
-msgstr ""
+msgstr "En tiempo real (preciso pero más lento)"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -2951,7 +2951,7 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "It is not allowed to mix refunds and sales"
-msgstr ""
+msgstr "No está permitido mezclar abonos y ventas"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3539,14 +3539,14 @@ msgstr "Sin enlace a una factura para %s, "
 #: code:addons/point_of_sale/static/src/js/Screens/PartnerListScreen/PartnerListScreen.js:0
 #, python-format
 msgid "No more customer found for \"%s\"."
-msgstr ""
+msgstr "No se han encontrado más clientes para \"%s\"."
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/js/Screens/ProductScreen/ProductsWidget.js:0
 #, python-format
 msgid "No more product found for \"%s\"."
-msgstr ""
+msgstr "No se han encontrado más productos para \"%s\"."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5187,7 +5187,7 @@ msgstr "Reembolsar Pedidos"
 #: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "Refund and Sales not allowed"
-msgstr ""
+msgstr "Abonos y ventas no permitidos"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5354,6 +5354,14 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/xml/Screens/PaymentScreen/PaymentScreenPaymentLines.xml:0
+#: code:addons/point_of_sale/models/pos_order.py:0
+#, python-format
+msgid "Reversal of: %s"
+msgstr "Anulación de: %s"
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/xml/Screens/PaymentScreen/PaymentScreenElectronicPayment.xml:0
 #, python-format
 msgid "Reversal request sent to terminal"
 msgstr "Solicitud de reversión enviada a la terminal"
@@ -5534,7 +5542,7 @@ msgstr "Buscar pedido de venta"
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/ProductsWidget.xml:0
 #, python-format
 msgid "Search more"
-msgstr ""
+msgstr "Buscar más"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__access_token
@@ -6359,6 +6367,13 @@ msgstr ""
 "La diferencia maxima permitida es %s.\n"
 "\n"
 "                        Contacte a su gerente para aceptar la diferencia de cierre."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_bill.py:0
+#, python-format
+msgid "The name of the Coins/Bills must be a number."
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.constraint,message:point_of_sale.constraint_pos_session_uniq_name
@@ -7391,13 +7406,6 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
-#: code:addons/point_of_sale/models/pos_config.py:0
-#, python-format
-msgid "You can only have one cash payment method."
-msgstr "Solo puede haber un método de pago efectivo."
-
-#. module: point_of_sale
-#. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 #, python-format
 msgid ""
@@ -7415,6 +7423,8 @@ msgstr ""
 #, python-format
 msgid "You cannot archive '%s' as it is used by a POS configuration '%s'."
 msgstr ""
+"No puede archivar '%s', ya que está siendo usado en la configuración de TPV "
+"'%s'."
 
 #. module: point_of_sale
 #. odoo-python

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from collections import defaultdict
-from itertools import product as cartesian_product
+
 import json
 import logging
 from datetime import datetime
@@ -128,6 +127,13 @@ class WebsiteSaleForm(WebsiteForm):
 
 
 class Website(main.Website):
+
+    def _login_redirect(self, uid, redirect=None):
+        # If we are logging in, clear the current pricelist to be able to find
+        # the pricelist that corresponds to the user afterwards.
+        request.session.pop('website_sale_current_pl', None)
+        return super()._login_redirect(uid, redirect=redirect)
+
     @http.route()
     def autocomplete(self, search_type=None, term=None, order=None, limit=5, max_nb_chars=999, options=None):
         options = options or {}
@@ -240,52 +246,7 @@ class WebsiteSale(http.Controller):
                                                                                order=self._get_search_order(post),
                                                                                options=options)
         search_result = details[0].get('results', request.env['product.template']).with_context(bin_size=True)
-        if attrib_set:
-            # Attributes value per attribute
-            attribute_values = request.env['product.attribute.value'].browse(attrib_set)
-            values_per_attribute = defaultdict(lambda: request.env['product.attribute.value'])
-            # In case we have only one value per attribute we can check for a combination using those attributes directly
-            multi_value_attribute = False
-            for value in attribute_values:
-                values_per_attribute[value.attribute_id] |= value
-                if len(values_per_attribute[value.attribute_id]) > 1:
-                    multi_value_attribute = True
 
-            def filter_template(template, attribute_values_list):
-                # Transform product.attribute.value to product.template.attribute.value
-                attribute_value_to_ptav = dict()
-                for ptav in template.attribute_line_ids.product_template_value_ids:
-                    attribute_value_to_ptav[ptav.product_attribute_value_id] = ptav.id
-                possible_combinations = False
-                for attribute_values in attribute_values_list:
-                    ptavs = request.env['product.template.attribute.value'].browse(
-                        [attribute_value_to_ptav[val] for val in attribute_values if val in attribute_value_to_ptav]
-                    )
-                    if len(ptavs) < len(attribute_values):
-                        # In this case the template is not compatible with this specific combination
-                        continue
-                    if len(ptavs) == len(template.attribute_line_ids):
-                        if template._is_combination_possible(ptavs):
-                            return True
-                    elif len(ptavs) < len(template.attribute_line_ids):
-                        if len(attribute_values_list) == 1:
-                            if any(template._get_possible_combinations(necessary_values=ptavs)):
-                                return True
-                        if not possible_combinations:
-                            possible_combinations = template._get_possible_combinations()
-                        if any(len(ptavs & combination) == len(ptavs) for combination in possible_combinations):
-                            return True
-                return False
-
-            # If multi_value_attribute is False we know that we have our final combination (or at least a subset of it)
-            if not multi_value_attribute:
-                possible_attrib_values_list = [attribute_values]
-            else:
-                # Cartesian product from dict keys and values
-                possible_attrib_values_list = [request.env['product.attribute.value'].browse([v.id for v in values]) for
-                                               values in cartesian_product(*values_per_attribute.values())]
-
-            search_result = search_result.filtered(lambda tmpl: filter_template(tmpl, possible_attrib_values_list))
         return fuzzy_search_term, product_count, search_result
 
     def _shop_get_query_url_kwargs(self, category, search, min_price, max_price, attrib=None, order=None, **post):
@@ -982,7 +943,7 @@ class WebsiteSale(http.Controller):
         # prevent name change if invoices exist
         if data.get('partner_id'):
             partner = request.env['res.partner'].browse(int(data['partner_id']))
-            if partner.exists() and partner.name and not partner.sudo().can_edit_vat() and 'name' in data and (data['name'] or False) != (partner.name or False):
+            if partner.exists() and partner.sudo().name and not partner.sudo().can_edit_vat() and 'name' in data and (data['name'] or False) != (partner.sudo().name or False):
                 error['name'] = 'error'
                 error_message.append(_('Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
 
@@ -995,7 +956,10 @@ class WebsiteSale(http.Controller):
 
         # error message for empty required fields
         for field_name in required_fields:
-            if not data.get(field_name):
+            val = data.get(field_name)
+            if isinstance(val, str):
+                val = val.strip()
+            if not val:
                 error[field_name] = 'missing'
 
         # email validation
@@ -1282,6 +1246,7 @@ class WebsiteSale(http.Controller):
         :param dict custom_values: Optional custom values for the creation or edition.
         :return int: The id of the partner created or edited
         """
+        request.update_env(context=request.website.env.context)
         values = self.values_preprocess(partner_details)
 
         # Ensure that we won't write on unallowed fields.
@@ -1474,7 +1439,7 @@ class WebsiteSale(http.Controller):
         return {
             'website_sale_order': order,
             'errors': [],
-            'partner': order.partner_id,
+            'partner': order.partner_invoice_id,
             'order': order,
             'payment_action_id': request.env.ref('payment.action_payment_provider').id,
             # Payment form common (checkout and manage) values
@@ -1747,7 +1712,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         kwargs.update({
             'reference_prefix': None,  # Allow the reference to be computed based on the order
-            'partner_id': order_sudo.partner_id.id,
+            'partner_id': order_sudo.partner_invoice_id.id,
             'sale_order_id': order_id,  # Include the SO to allow Subscriptions to tokenize the tx
         })
         kwargs.pop('custom_create_values', None)  # Don't allow passing arbitrary create values

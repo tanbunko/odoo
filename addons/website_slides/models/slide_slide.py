@@ -118,7 +118,7 @@ class Slide(models.Model):
     active = fields.Boolean(default=True, tracking=100)
     sequence = fields.Integer('Sequence', default=0)
     user_id = fields.Many2one('res.users', string='Uploaded by', default=lambda self: self.env.uid)
-    description = fields.Html('Description', translate=True)
+    description = fields.Html('Description', translate=True, sanitize_attributes=False)
     channel_id = fields.Many2one('slide.channel', string="Course", required=True, ondelete='cascade')
     tag_ids = fields.Many2many('slide.tag', 'rel_slide_tag', 'slide_id', 'tag_id', string='Tags')
     is_preview = fields.Boolean('Allow Preview', default=False, help="The course is accessible by anyone : the users don't need to join the channel to access the content of the course.")
@@ -939,8 +939,8 @@ class Slide(models.Model):
         """
         if any(not slide.channel_id.is_member or not slide.website_published for slide in self):
             raise UserError(
-                _('You cannot mark a slide quiz as completed if you are not among its members.') if completed
-                else _('You cannot mark a slide quiz as not completed if you are not among its members.')
+                _('You cannot mark a slide quiz as completed if you are not among its members or it is unpublished.') if completed
+                else _('You cannot mark a slide quiz as not completed if you are not among its members or it is unpublished.')
             )
 
         points = 0

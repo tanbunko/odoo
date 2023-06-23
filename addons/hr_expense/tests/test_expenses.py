@@ -103,6 +103,45 @@ class TestExpenses(TestExpenseCommon):
 
         self.assertEqual(expense_sheet.payment_state, 'paid', 'payment_state should be paid')
 
+    def test_expense_sheet_company_payment_state(self):
+        ''' Test expense sheet company payment states'''
+
+        expense_sheet = self.env['hr.expense.sheet'].create({
+            'name': 'Expense for John Smith',
+            'employee_id': self.expense_employee.id,
+            'accounting_date': '2021-01-01',
+            'expense_line_ids': [(0, 0, {
+                'name': 'Car Travel Expenses',
+                'employee_id': self.expense_employee.id,
+                'product_id': self.product_a.id,
+                'unit_amount': 350.00,
+                'payment_mode': 'company_account',
+            })]
+        })
+
+        expense_sheet.action_submit_sheet()
+        expense_sheet.approve_expense_sheets()
+        expense_sheet.action_sheet_move_create()
+
+        self.assertEqual(expense_sheet.payment_state, 'paid', 'payment_state should be paid')
+        liquidity_line = expense_sheet.account_move_id.payment_id._seek_for_lines()[0]
+
+        statement_line = self.env['account.bank.statement.line'].create({
+            'journal_id': self.company_data['default_journal_bank'].id,
+            'payment_ref': 'pay_ref',
+            'amount': -350.0,
+            'partner_id': self.expense_employee.address_home_id.id,
+        })
+
+        # Reconcile without the bank reconciliation widget since the widget is in enterprise.
+        _st_liquidity_lines, st_suspense_lines, _st_other_lines = statement_line\
+            .with_context(skip_account_move_synchronization=True)\
+            ._seek_for_lines()
+        st_suspense_lines.account_id = liquidity_line.account_id
+        (st_suspense_lines + liquidity_line).reconcile()
+
+        self.assertEqual(expense_sheet.payment_state, 'paid', 'payment_state should be paid')
+
     def test_expense_values(self):
         """ Checking accounting move entries and analytic entries when submitting expense """
         # The expense employee is able to a create an expense sheet.
@@ -827,3 +866,113 @@ class TestExpenses(TestExpenseCommon):
 
         expense.unlink()
         self.analytic_account_1.unlink()
+
+    def test_reset_move_to_draft(self):
+        """
+        Test the state of an expense and its report
+        after resetting the paid move to draft
+        """
+        expense_sheet = self.env['hr.expense.sheet'].create({
+            'company_id': self.env.company.id,
+            'employee_id': self.expense_employee.id,
+            'name': 'test sheet',
+            'expense_line_ids': [
+                (0, 0, {
+                    'name': 'expense_1',
+                    'employee_id': self.expense_employee.id,
+                    'product_id': self.product_a.id,
+                    'unit_amount': 1000.00,
+                }),
+            ],
+        })
+
+        expense = expense_sheet.expense_line_ids
+
+        self.assertEqual(expense.state, 'draft', 'Expense state must be draft before sheet submission')
+        self.assertEqual(expense_sheet.state, 'draft', 'Sheet state must be draft before submission')
+
+        # Submit report
+        expense_sheet.action_submit_sheet()
+
+        self.assertEqual(expense.state, 'reported', 'Expense state must be reported after sheet submission')
+        self.assertEqual(expense_sheet.state, 'submit', 'Sheet state must be submit after submission')
+
+        # Approve report
+        expense_sheet.approve_expense_sheets()
+
+        self.assertEqual(expense.state, 'approved', 'Expense state must be draft after sheet approval')
+        self.assertEqual(expense_sheet.state, 'approve', 'Sheet state must be draft after approval')
+
+        # Create move
+        expense_sheet.action_sheet_move_create()
+
+        self.assertEqual(expense.state, 'approved', 'Expense state must be draft after posting move')
+        self.assertEqual(expense_sheet.state, 'post', 'Sheet state must be draft after posting move')
+
+        # Pay move
+        move = expense_sheet.account_move_id
+        self.env['account.payment.register'].with_context(active_model='account.move', active_ids=move.ids).create({
+            'amount': 1000.0,
+        })._create_payments()
+
+        self.assertEqual(expense.state, 'done', 'Expense state must be done after payment')
+        self.assertEqual(expense_sheet.state, 'done', 'Sheet state must be done after payment')
+
+        # Reset move to draft
+        move.button_draft()
+
+        self.assertEqual(expense.state, 'approved', 'Expense state must be approved after resetting move to draft')
+        self.assertEqual(expense_sheet.state, 'post', 'Sheet state must be done after resetting move to draft')
+
+        # Post and pay move again
+        move.action_post()
+        self.env['account.payment.register'].with_context(active_model='account.move', active_ids=move.ids).create({
+            'amount': 1000.0,
+        })._create_payments()
+
+        self.assertEqual(expense.state, 'done', 'Expense state must be done after payment')
+        self.assertEqual(expense_sheet.state, 'done', 'Sheet state must be done after payment')
+
+    def test_expense_sheet_due_date(self):
+        ''' Test expense sheet bill due date'''
+
+        self.expense_employee.user_partner_id.property_supplier_payment_term_id = self.env.ref('account.account_payment_term_30days')
+
+        expense_sheet = self.env['hr.expense.sheet'].create({
+            'name': 'Expense for John Smith',
+            'employee_id': self.expense_employee.id,
+            'accounting_date': '2021-01-01',
+            'expense_line_ids': [(0, 0, {
+                'name': 'Car Travel Expenses',
+                'employee_id': self.expense_employee.id,
+                'product_id': self.product_a.id,
+                'unit_amount': 350.00,
+            })]
+        })
+
+        expense_sheet.action_submit_sheet()
+        expense_sheet.approve_expense_sheets()
+        expense_sheet.action_sheet_move_create()
+        move = expense_sheet.account_move_id
+        expected_date = fields.Date.from_string('2021-01-31')
+        self.assertEqual(move.invoice_date_due, expected_date, 'Bill due date should follow employee payment terms')
+
+    def test_inverse_total_amount(self):
+        """ Test if the inverse method works correctly """
+
+        expense = self.env['hr.expense'].create({
+            'name': 'Choucroute Saucisse',
+            'employee_id': self.expense_employee.id,
+            'product_id': self.product_c.id,
+            'total_amount': 60,
+            'unit_amount': 0,
+            'tax_ids': [self.tax_purchase_a.id, self.tax_purchase_b.id],
+            'analytic_distribution': {
+                self.analytic_account_1.id: 50,
+                self.analytic_account_2.id: 50,
+            },
+        })
+
+        expense.total_amount = 90
+
+        self.assertEqual(expense.unit_amount, 90, 'Unit amount should be the same as total amount was written to')

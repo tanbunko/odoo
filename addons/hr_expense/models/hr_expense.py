@@ -72,7 +72,7 @@ class HrExpense(models.Model):
     amount_tax = fields.Monetary(string='Tax amount in Currency', help="Tax amount in currency", compute='_compute_amount_tax', store=True, currency_field='currency_id')
     amount_tax_company = fields.Monetary('Tax amount', help="Tax amount in company currency", compute='_compute_total_amount_company', store=True, currency_field='company_currency_id')
     amount_residual = fields.Monetary(string='Amount Due', compute='_compute_amount_residual')
-    total_amount = fields.Monetary("Total In Currency", compute='_compute_amount', store=True, currency_field='currency_id', tracking=True, readonly=False)
+    total_amount = fields.Monetary("Total In Currency", compute='_compute_amount', store=True, currency_field='currency_id', tracking=True, readonly=False, inverse='_inverse_total_amount')
     untaxed_amount = fields.Monetary("Total Untaxed Amount In Currency", compute='_compute_amount_tax', store=True, currency_field='currency_id')
     company_currency_id = fields.Many2one('res.currency', string="Report Company Currency", related='company_id.currency_id', readonly=True)
     total_amount_company = fields.Monetary('Total', compute='_compute_total_amount_company', store=True, currency_field='company_currency_id')
@@ -318,6 +318,11 @@ class HrExpense(models.Model):
             })
             expense.analytic_distribution = distribution or expense.analytic_distribution
 
+    @api.onchange('total_amount')
+    def _inverse_total_amount(self):
+        for expense in self:
+            expense.unit_amount = expense.total_amount_company / expense.quantity
+
     @api.constrains('payment_mode')
     def _check_payment_mode(self):
         self.sheet_id._check_payment_mode()
@@ -352,8 +357,9 @@ class HrExpense(models.Model):
             raise UserError(_("You need to have at least one category that can be expensed in your database to proceed!"))
 
         for attachment in attachments:
+            attachment_name = '.'.join(attachment.name.split('.')[:-1])
             expense = self.env['hr.expense'].create({
-                'name': product.display_name,
+                'name': attachment_name,
                 'unit_amount': 0,
                 'product_id': product.id,
             })
@@ -383,6 +389,8 @@ class HrExpense(models.Model):
                 raise UserError(_('You cannot delete a posted or approved expense.'))
 
     def write(self, vals):
+        if 'sheet_id' in vals:
+            self.env['hr.expense.sheet'].browse(vals['sheet_id']).check_access_rule('write')
         if 'tax_ids' in vals or 'analytic_distribution' in vals or 'account_id' in vals:
             if any(not expense.is_editable for expense in self):
                 raise UserError(_('You are not authorized to edit this expense report.'))
@@ -1230,7 +1238,11 @@ class HrExpenseSheet(models.Model):
         if not filtered_sheet:
             return notification
         for sheet in filtered_sheet:
-            sheet.write({'state': 'approve', 'user_id': sheet.user_id.id or self.env.user.id})
+            sheet.write({
+                'state': 'approve',
+                'user_id': sheet.user_id.id or self.env.user.id,
+                'approval_date': fields.Date.context_today(sheet),
+            })
         notification['params'].update({
             'title': _('The expense reports were successfully approved.'),
             'type': 'success',

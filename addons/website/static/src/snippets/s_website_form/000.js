@@ -349,12 +349,39 @@ odoo.define('website.s_website_form', function (require) {
                     }
                     switch (successMode) {
                         case 'redirect': {
-                            successPage = successPage.startsWith("/#") ? successPage.slice(1) : successPage;
+                            let hashIndex = successPage.indexOf("#");
+                            if (hashIndex > 0) {
+                                // URL containing an anchor detected: extract
+                                // the anchor from the URL if the URL is the
+                                // same as the current page URL so we can scroll
+                                // directly to the element (if found) later
+                                // instead of redirecting.
+                                // Note that both currentUrlPath and successPage
+                                // can exist with or without a trailing slash
+                                // before the hash (e.g. "domain.com#footer" or
+                                // "domain.com/#footer"). Therefore, if they are
+                                // not present, we add them to be able to
+                                // compare the two variables correctly.
+                                let currentUrlPath = window.location.pathname;
+                                if (!currentUrlPath.endsWith("/")) {
+                                    currentUrlPath = currentUrlPath + "/";
+                                }
+                                if (!successPage.includes("/#")) {
+                                    successPage = successPage.replace("#", "/#");
+                                    hashIndex++;
+                                }
+                                if ([successPage, "/" + session.lang_url_code + successPage].some(link => link.startsWith(currentUrlPath + '#'))) {
+                                    successPage = successPage.substring(hashIndex);
+                                }
+                            }
                             if (successPage.charAt(0) === "#") {
-                                await dom.scrollTo($(successPage)[0], {
-                                    duration: 500,
-                                    extraOffset: 0,
-                                });
+                                const successAnchorEl = document.getElementById(successPage.substring(1));
+                                if (successAnchorEl) {
+                                    await dom.scrollTo(successAnchorEl, {
+                                        duration: 500,
+                                        extraOffset: 0,
+                                    });
+                                }
                                 break;
                             }
                             $(window.location).attr('href', successPage);
@@ -466,7 +493,8 @@ odoo.define('website.s_website_form', function (require) {
                     if (_.isString(error_fields[field_name])) {
                         $field.popover({content: error_fields[field_name], trigger: 'hover', container: 'body', placement: 'top'});
                         // update error message and show it.
-                        $field.data("bs.popover").config.content = error_fields[field_name];
+                        const popover = Popover.getInstance($field);
+                        popover._config.content = error_fields[field_name];
                         $field.popover('show');
                     }
                     form_valid = false;
@@ -559,10 +587,32 @@ odoo.define('website.s_website_form', function (require) {
          * @returns {boolean}
          */
         _compareTo(comparator, value = '', comparable, between) {
+            const valueWasNull = (value === null);
+            if (valueWasNull) {
+                // TODO One customer apparently reached that case of receiving
+                // a `null` value (actually possible when retrieving a form
+                // data which is an unchecked checkbox for example) but combined
+                // with an operator which really requires the received value to
+                // be a string... but not sure how this is possible. In any
+                // case, it should not make the form crash: it's just a
+                // problematic *visibility* dependency, it should not prevent
+                // using the form. So if the caller sends a `null` value, treat
+                // it as an empty string. For now, let's also add an error in
+                // the console so we may investigate the issue if it ever shows
+                // up in a test (grep: COMPARE_TO_INVALID_OPERATOR)
+                value = '';
+            }
+
             switch (comparator) {
                 case 'contains':
+                    if (valueWasNull) { // grep: COMPARE_TO_INVALID_OPERATOR
+                        console.error("This field value is null but also uses an invalid operator");
+                    }
                     return value.includes(comparable);
                 case '!contains':
+                    if (valueWasNull) { // grep: COMPARE_TO_INVALID_OPERATOR
+                        console.error("This field value is null but also uses an invalid operator");
+                    }
                     return !value.includes(comparable);
                 case 'equal':
                 case 'selected':
@@ -588,6 +638,9 @@ odoo.define('website.s_website_form', function (require) {
                     return value.name === '';
             }
             // Date & Date Time comparison requires formatting the value
+            if (valueWasNull) { // grep: COMPARE_TO_INVALID_OPERATOR
+                console.error("This field value is null but also uses an invalid operator");
+            }
             if (value.includes(':')) {
                 const datetimeFormat = time.getLangDatetimeFormat();
                 value = moment(value, datetimeFormat)._d.getTime() / 1000;
