@@ -3,8 +3,8 @@
 # 	* purchase_requisition
 # 
 # Translators:
-# Martin Trigaux, 2022
 # Benson <Benson.Dr@Gmail.com>, 2023
+# Martin Trigaux, 2023
 # Tony Ng, 2023
 # 
 msgid ""
@@ -40,6 +40,11 @@ msgstr "<strong>日期</strong>"
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
 msgid "<strong>Description</strong>"
 msgstr "<strong>描述</strong>"
+
+#. module: purchase_requisition
+#: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
+msgid "<strong>Product</strong>"
+msgstr "<strong>產品</strong>"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
@@ -641,8 +646,8 @@ msgstr "錯誤數量"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "需要處理的消息數量"
+msgid "Number of messages requiring action"
+msgstr "需要採取行動的訊息數目"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition__message_has_error_counter

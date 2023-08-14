@@ -5,12 +5,13 @@
 # Translators:
 # Éder Brito <britoederr@gmail.com>, 2022
 # Luis Felipe Miléo <mileo@kmee.com.br>, 2022
-# grazziano <gra.negocia@gmail.com>, 2022
+# grazziano <grazziano.do+transifex@gmail.com>, 2022
 # Marcel Savegnago <marcel.savegnago@gmail.com>, 2022
 # Felipe Leal Coutinho <felipe@felipelc.com>, 2022
 # Martin Trigaux, 2022
 # Jolien De Paepe, 2023
 # Kevilyn Rosa, 2023
+# adrianojprado <adrianojprado@gmail.com>, 2023
 # Layna Nascimento, 2023
 # 
 msgid ""
@@ -55,7 +56,7 @@ msgstr "%s avaliações"
 #: model_terms:ir.ui.view,arch_db:website_sale.address_on_payment
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "&amp; Shipping"
-msgstr "&amp; Envio"
+msgstr "e Envio"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -490,7 +491,7 @@ msgid ""
 "<strong>No suitable payment option could be found.</strong><br/>\n"
 "                                    If you believe that it is an error, please contact the website administrator."
 msgstr ""
-"<strong>Nenhuma opção de pagamento adequada foi encontrada.</strong><br/>\n"
+"<strong>Não foi possível encontrar uma opção de pagamento adequada.</strong><br/>\n"
 "                                    Se você acredita que isso é um erro, entre em contato com o administrador do site."
 
 #. module: website_sale
@@ -884,7 +885,7 @@ msgstr "Valor médio dos pedidos"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_avg
 msgid "Average Rating"
-msgstr "Classificação média"
+msgstr "Avaliação média"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -2099,6 +2100,18 @@ msgstr "Checkout instantâneo ao invés de adicionar ao carrinho"
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
 #, python-format
+msgid ""
+"If you are ordering for an external person, please place your order via the "
+"backend. If you wish to change your name or email address, please do so in "
+"the account settings or contact your administrator."
+msgstr ""
+"Se você estiver fazendo o pedido para uma pessoa externa, faça seu pedido "
+"por meio do back-end. Se você deseja alterar seu nome ou endereço de e-mail,"
+" faça-o nas configurações da conta ou entre em contato com o administrador."
+
+#. module: website_sale
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
 msgid "Invalid Email! Please enter a valid email address."
 msgstr "E-mail inválido! Por favor insira um endereço de e-mail válido."
 
@@ -2306,6 +2319,8 @@ msgstr "Imagem principal"
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Manage Promotions, coupons, loyalty cards, Gift cards &amp; eWallet"
 msgstr ""
+"Gerenciar promoções, cupons, cartões de fidelidade, cartões-presente e "
+"eWallet"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -4127,7 +4142,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_add_to_cart_options
 msgid "Variant"
-msgstr "Subtipo"
+msgstr "Variante"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -4308,7 +4323,7 @@ msgstr "Palavras-chave do Site"
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_title
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_meta_title
 msgid "Website meta title"
-msgstr "Meta título site"
+msgstr "Metatítulo do site"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__website_meta_og_img
