@@ -13,6 +13,8 @@
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2023
 # Jiří Podhorecký, 2023
 # Aleš Fiala <f.ales1@seznam.cz>, 2023
+# Wil Odoo, 2023
+# Tomáš Píšek, 2023
 # Jakub Smolka, 2023
 # 
 msgid ""
@@ -330,7 +332,7 @@ msgstr "15 km"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "2 <span class=\"visually-hidden\">(current)</span>"
-msgstr ""
+msgstr "2 <span class=\"visually-hidden\">(současné)</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
@@ -2014,7 +2016,7 @@ msgstr "Autor"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_view_form
 msgid "Authorized Groups"
-msgstr ""
+msgstr "Autorizované skupiny"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -4379,7 +4381,7 @@ msgstr ""
 #. module: website
 #: model:ir.model,name:website.model_ir_binary
 msgid "File streaming helper model for controllers"
-msgstr ""
+msgstr "Model podpory streamování souborů pro kontrolery"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -5145,7 +5147,7 @@ msgstr "Úvod"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Home <span class=\"visually-hidden\">(current)</span>"
-msgstr ""
+msgstr "Domovská stránka <span class=\"visually-hidden\">(současná)</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -6602,7 +6604,7 @@ msgstr "Mobilní"
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 #, python-format
 msgid "Mobile Alignment"
-msgstr ""
+msgstr "Mobilní zarovnání"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -7579,6 +7581,13 @@ msgstr "Vzor"
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
 msgid "Pay"
 msgstr "Zaplatit"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Phone Number"
+msgstr "Telefonní číslo"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -8888,6 +8897,8 @@ msgid ""
 "Small text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
 "<i>Integer posuere erat a ante</i>."
 msgstr ""
+"Malý text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
+"<i>Integer posuere erat a ante</i>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -9117,6 +9128,13 @@ msgid "Sub Menus"
 msgstr "Dílčí nabídky"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Subject"
+msgstr "Předmět"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_website_form
 msgid "Submit"
@@ -9328,7 +9346,7 @@ msgstr "Pozice textu"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
 msgid "Text muted. Lorem <b>ipsum dolor sit amet</b>, consectetur."
-msgstr ""
+msgstr "Ztlumený text. Lorem <b>ipsum dolor sit amet</b>, consectetur."
 
 #. module: website
 #. odoo-javascript
@@ -9501,7 +9519,7 @@ msgstr "Téma"
 #. module: website
 #: model:ir.model,name:website.model_theme_ir_asset
 msgid "Theme Asset"
-msgstr ""
+msgstr "Asset webové šablony"
 
 #. module: website
 #: model:ir.model,name:website.model_theme_ir_attachment
@@ -9657,6 +9675,8 @@ msgid ""
 "This font already exists, you can only add it as a local font to replace the"
 " server version."
 msgstr ""
+"Toto písmo již existuje, můžete jej přidat pouze jako místní písmo a "
+"nahradit tak serverovou verzi."
 
 #. module: website
 #. odoo-javascript
@@ -9713,7 +9733,7 @@ msgstr ""
 #: code:addons/website/static/src/components/translator/translator.js:0
 #, python-format
 msgid "This translation is not editable."
-msgstr ""
+msgstr "Tento překlad není upravitelný."
 
 #. module: website
 #. odoo-javascript
@@ -9953,14 +9973,14 @@ msgstr "Přeložit atribut"
 #: code:addons/website/static/src/components/translator/translator.js:0
 #, python-format
 msgid "Translate Selection Option"
-msgstr ""
+msgstr "Možnost výběru překladu"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/translator/translator.js:0
 #, python-format
 msgid "Translate header in the text. Menu is generated automatically."
-msgstr ""
+msgstr "Záhlaví překladu v textu. Nabídka je generována automaticky."
 
 #. module: website
 #. odoo-javascript
@@ -10737,7 +10757,7 @@ msgstr ""
 #. module: website
 #: model:ir.model,name:website.model_website_configurator_feature
 msgid "Website Configurator Feature"
-msgstr ""
+msgstr "Funkcionalita webového konfigurátoru"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_domain
@@ -10834,7 +10854,7 @@ msgstr "Mixin publikovaný na webu"
 #. module: website
 #: model:ir.model,name:website.model_website_searchable_mixin
 msgid "Website Searchable Mixin"
-msgstr ""
+msgstr "Mixin prohledávatelného weebu"
 
 #. module: website
 #. odoo-javascript
@@ -10962,7 +10982,7 @@ msgstr "Web: analytika"
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_dashboard
 msgid "Website: Dashboard"
-msgstr "Webstránka: ovládací panel"
+msgstr "Web: Dashboard"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.action_website_list
@@ -11211,6 +11231,13 @@ msgid "You'll be able to create your pages later on."
 msgstr ""
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Company"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
@@ -11218,6 +11245,27 @@ msgid ""
 msgstr ""
 "Zde se zobrazí váš dynamický úryvek ... Tato zpráva se zobrazí, protože jste"
 " neposkytli filtr i šablonu, které chcete použít.<br/>"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Email"
+msgstr "Váš e-mail"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Name"
+msgstr "Vaše jméno"
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Question"
+msgstr ""
 
 #. module: website
 #. odoo-javascript
