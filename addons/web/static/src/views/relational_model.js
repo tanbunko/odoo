@@ -631,6 +631,14 @@ export class Record extends DataPoint {
                         this.setInvalidField(fieldName);
                     }
                     break;
+                case "json":
+                    if (
+                        this.isRequired(fieldName) &&
+                        (!this.data[fieldName] || !Object.keys(this.data[fieldName]).length)
+                    ) {
+                        this.setInvalidField(fieldName);
+                    }
+                    break;
                 default:
                     if (!isSet && this.isRequired(fieldName) && !this.data[fieldName]) {
                         this.setInvalidField(fieldName);
@@ -1668,7 +1676,8 @@ class DynamicList extends DataPoint {
                     } catch (e) {
                         record.discard();
                         const errorMessage = e instanceof RPCError ? e.data.message : e.message;
-                        const errorTitle = e instanceof RPCError ? e.message : this.model.env._t("Error");
+                        const errorTitle =
+                            e instanceof RPCError ? e.message : this.model.env._t("Error");
                         this.model.notificationService.add(errorMessage, {
                             title: errorTitle,
                             type: "danger",
@@ -3528,7 +3537,7 @@ export class RelationalModel extends Model {
             },
         };
         const state = this.root
-            ? Object.assign(this.root.exportState(), { offset: 0 })
+            ? Object.assign(this.root.exportState(), { offset: params.offset || 0 })
             : this.initialRootState;
 
         const newRoot = this.createDataPoint(this.rootType, rootParams, state);
