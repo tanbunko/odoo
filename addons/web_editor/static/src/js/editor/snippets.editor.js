@@ -5,6 +5,7 @@ var concurrency = require('web.concurrency');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var dom = require('web.dom');
+const { session } = require('@web/session');
 const {Markup, sprintf, confine} = require('web.utils');
 var Widget = require('web.Widget');
 var options = require('web_editor.snippets.options');
@@ -1887,6 +1888,13 @@ var SnippetsMenu = Widget.extend({
         // own window and not on the top window lest jquery behave unexpectedly.
         this.$el = this.window.$(this.$el);
         this.$el.data('snippetMenu', this);
+
+        // TODO somehow this attribute is not on the HTML element of the backend
+        // ... it probably should be.
+        const context = this.options.context || session.user_context || {};
+        const userLang = context.user_lang || context.lang || 'en_US';
+        this.el.setAttribute('lang', userLang.replace('_', '-'));
+
         // We need to activate the touch events to be able to drag and drop
         // snippets on devices with a touch screen.
         this.__onTouchEvent = this._onTouchEvent.bind(this);
@@ -2092,7 +2100,7 @@ var SnippetsMenu = Widget.extend({
             // menu will take part of the screen width (delayed because of
             // animation). (TODO wait for real animation end)
             setTimeout(() => {
-                this.$window.trigger('resize');
+                this.$window[0].dispatchEvent(new Event("resize"));
             }, 1000);
         });
     },
@@ -4452,7 +4460,7 @@ var SnippetsMenu = Widget.extend({
             return;
         }
         if (!range ||
-            !$currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper .o_editable').length ||
+            !$currentSelectionTarget.parents('#wrapwrap, .iframe-editor-wrapper').length ||
             closestElement(selection.anchorNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-initial-sha])') ||
             closestElement(selection.focusNode, '[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"]):not([data-oe-translation-initial-sha])') ||
             (e && $(e.target).closest('.fa, img').length ||
