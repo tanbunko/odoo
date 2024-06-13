@@ -187,6 +187,9 @@ mimetypes.add_type('application/vnd.ms-fontobject', '.eot')
 mimetypes.add_type('application/x-font-ttf', '.ttf')
 # Add potentially wrong (detected on windows) svg mime types
 mimetypes.add_type('image/svg+xml', '.svg')
+# this one can be present on windows with the value 'text/plain' which
+# breaks loading js files from an addon's static folder
+mimetypes.add_type('text/javascript', '.js')
 
 # To remove when corrected in Babel
 babel.core.LOCALE_ALIASES['nb'] = 'nb_NO'
@@ -825,6 +828,8 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
     """ Place where to load and save session objects. """
     def get_session_filename(self, sid):
         # scatter sessions across 256 directories
+        if not self.is_valid_key(sid):
+            raise ValueError(f'Invalid session id {sid!r}')
         sha_dir = sid[:2]
         dirname = os.path.join(self.path, sha_dir)
         session_path = os.path.join(dirname, sid)
@@ -870,7 +875,7 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
 
 class Session(collections.abc.MutableMapping):
     """ Structure containing data persisted across requests. """
-    __slots__ = ('can_save', '_Session__data', 'is_dirty', 'is_explicit', 'is_new',
+    __slots__ = ('can_save', '_Session__data', 'is_dirty', 'is_new',
                  'should_rotate', 'sid')
 
     def __init__(self, data, sid, new=False):
@@ -878,7 +883,6 @@ class Session(collections.abc.MutableMapping):
         self.__data = {}
         self.update(data)
         self.is_dirty = False
-        self.is_explicit = False
         self.is_new = new
         self.should_rotate = False
         self.sid = sid
@@ -964,6 +968,8 @@ class Session(collections.abc.MutableMapping):
             # Like update_env(user=request.session.uid) but works when uid is None
             request.env = odoo.api.Environment(request.env.cr, self.uid, self.context)
             request.update_context(**self.context)
+            # request env needs to be able to access the latest changes from the auth layers
+            request.env.cr.commit()
 
         return pre_uid
 
@@ -1192,25 +1198,12 @@ class Request:
         self.session, self.db = self._get_session_and_dbname()
 
     def _get_session_and_dbname(self):
-        # The session is explicit when it comes from the query-string or
-        # the header. It is implicit when it comes from the cookie or
-        # that is does not exist yet. The explicit session should be
-        # used in this request only, it should not be saved on the
-        # response cookie.
-        sid = (self.httprequest.args.get('session_id')
-            or self.httprequest.headers.get("X-Openerp-Session-Id"))
-        if sid:
-            is_explicit = True
-        else:
-            sid = self.httprequest.cookies.get('session_id')
-            is_explicit = False
-
-        if sid is None:
+        sid = self.httprequest.cookies.get('session_id')
+        if not sid or not root.session_store.is_valid_key(sid):
             session = root.session_store.new()
         else:
             session = root.session_store.get(sid)
             session.sid = sid  # in case the session was not persisted
-        session.is_explicit = is_explicit
 
         for key, val in get_default_session().items():
             session.setdefault(key, val)
@@ -1406,7 +1399,6 @@ class Request:
             **self.httprequest.form,
             **self.httprequest.files
         }
-        params.pop('session_id', None)
         return params
 
     def get_json_data(self):
@@ -1545,17 +1537,8 @@ class Request:
             sess['_geoip'] = self.geoip
             root.session_store.save(sess)
 
-        # We must not set the cookie if the session id was specified
-        # using a http header or a GET parameter.
-        # There are two reasons to this:
-        # - When using one of those two means we consider that we are
-        #   overriding the cookie, which means creating a new session on
-        #   top of an already existing session and we don't want to
-        #   create a mess with the 'normal' session (the one using the
-        #   cookie). That is a special feature of the Javascript Session.
-        # - It could allow session fixation attacks.
         cookie_sid = self.httprequest.cookies.get('session_id')
-        if not sess.is_explicit and (sess.is_dirty or cookie_sid != sess.sid):
+        if sess.is_dirty or cookie_sid != sess.sid:
             self.future_response.set_cookie('session_id', sess.sid, max_age=SESSION_LIFETIME, httponly=True)
 
     def _set_request_dispatcher(self, rule):
@@ -1791,7 +1774,7 @@ class HttpDispatcher(Dispatcher):
             was_connected = session.uid is not None
             session.logout(keep_db=True)
             response = self.request.redirect_query('/web/login', {'redirect': self.request.httprequest.full_path})
-            if not session.is_explicit and was_connected:
+            if was_connected:
                 root.session_store.rotate(session, self.request.env)
                 response.set_cookie('session_id', session.sid, max_age=SESSION_LIFETIME, httponly=True)
             return response
@@ -2033,10 +2016,11 @@ class Application:
         with HTTPRequest(environ) as httprequest:
             request = Request(httprequest)
             _request_stack.push(request)
-            request._post_init()
-            current_thread.url = httprequest.url
 
             try:
+                request._post_init()
+                current_thread.url = httprequest.url
+
                 if self.get_static_file(httprequest.path):
                     response = request._serve_static()
                 elif request.db:
@@ -2060,7 +2044,7 @@ class Application:
                     pass
                 elif isinstance(exc, SessionExpiredException):
                     _logger.info(exc)
-                elif isinstance(exc, (UserError, AccessError, NotFound)):
+                elif isinstance(exc, (UserError, AccessError)):
                     _logger.warning(exc)
                 else:
                     _logger.error("Exception during request handling.", exc_info=True)

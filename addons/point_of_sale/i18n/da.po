@@ -5,8 +5,8 @@
 # Translators:
 # Martin Trigaux, 2023
 # Mads Søndergaard, 2023
-# lhmflexerp <lhm@flexerp.dk>, 2023
 # Mads Søndergaard, 2024
+# lhmflexerp <lhm@flexerp.dk>, 2024
 # Sanne Kristensen <sanne@vkdata.dk>, 2024
 # 
 msgid ""
@@ -53,7 +53,7 @@ msgstr "KREDITNOTA"
 #: code:addons/point_of_sale/static/src/xml/Screens/ProductScreen/NumpadWidget.xml:0
 #, python-format
 msgid "% Disc"
-msgstr ""
+msgstr "% Rabat"
 
 #. module: point_of_sale
 #. odoo-python
@@ -6456,9 +6456,10 @@ msgstr ""
 #, python-format
 msgid ""
 "The maximum difference allowed is %s.\n"
-"\n"
-"                        Please contact your manager to accept the closing difference."
+"Please contact your manager to accept the closing difference."
 msgstr ""
+"Den maksimalt tilladte forskel er %s.\n"
+"Kontakt venligst din leder for at acceptere kassedifferencen."
 
 #. module: point_of_sale
 #. odoo-python

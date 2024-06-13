@@ -522,11 +522,15 @@ class TestUBLBE(TestUBLCommon):
             self.partner_1,
             self.partner_2,
             move_type='out_invoice',
-            invoice_line_ids=[{'quantity': 3, 'price_unit': 102.15}],
+            invoice_line_ids=[
+                {'quantity': 3, 'price_unit': 102.15},
+                {'quantity': 3, 'price_unit': 83.60},
+            ],
         )
         attachment = invoice._get_edi_attachment(self.edi_format)
-        price_amount = etree.fromstring(attachment.raw).find('.//{*}InvoiceLine/{*}Price/{*}PriceAmount')
-        self.assertEqual(price_amount.text, '102.15')
+        price_amounts = etree.fromstring(attachment.raw).findall('.//{*}InvoiceLine/{*}Price/{*}PriceAmount')
+        self.assertEqual(price_amounts[0].text, '102.15')
+        self.assertEqual(price_amounts[1].text, '83.6')
 
     def test_export_tax_exempt(self):
         invoice = self._generate_move(
@@ -727,3 +731,27 @@ class TestUBLBE(TestUBLCommon):
             list_line_discount=[0, 0, 0, 0, 0], list_line_taxes=[self.tax_6, tax_21, self.tax_0, self.tax_6, tax_21],
             move_type='out_invoice',
         )
+
+    def test_inverting_negative_price_unit(self):
+        """ We can not have negative unit prices, so we try to invert the unit price and quantity.
+        """
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 100.0,
+                    'tax_ids': [(6, 0, self.tax_21.ids)],
+                },
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': -25.0,
+                    'tax_ids': [(6, 0, self.tax_21.ids)],
+                }
+            ],
+        )
+        self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_out_invoice_negative_unit_price.xml')
