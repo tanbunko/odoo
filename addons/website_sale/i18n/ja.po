@@ -2653,7 +2653,7 @@ msgstr "今支払う"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment
 msgid "Pay with"
-msgstr "お支払"
+msgstr "支払方法:"
 
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_payment_icons
@@ -2739,7 +2739,7 @@ msgstr "役職"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__website_sale_prevent_zero_price_sale
 msgid "Prevent Sale of Zero Priced Product"
-msgstr "価格は「0」と設定したプロダクトの販売を阻止"
+msgstr "価格を「0」と設定したプロダクトの販売を阻止"
 
 #. module: website_sale
 #. odoo-javascript
@@ -3680,12 +3680,12 @@ msgstr "プロダクトページに留まる"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid "Street 2"
-msgstr "アドレス2 (ビル名等)"
+msgstr "町名番地2 "
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid "Street <span class=\"d-none d-md-inline\"> and Number</span>"
-msgstr "町名番地"
+msgstr "町名<span class=\"d-none d-md-inline\">番地</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options

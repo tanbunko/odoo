@@ -392,8 +392,11 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
-msgid "<b>Early Payment Discount applied.</b>"
-msgstr "<b>Vroege betalingskorting toegepast.</b>"
+msgid ""
+"<b>Early Payment Discount of %(payment_reference) has been applied.</b>"
+msgstr ""
+"<b>Een vroegtijdige betalingskorting van %(payment_reference) is "
+"toegepast.</b>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -7925,8 +7928,13 @@ msgstr "Ongeldig"
 #. odoo-python
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
-msgstr "Foute *Postcode reeks\", graag deze correct te configureren."
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
+msgstr ""
+"Ongeldig \"postcodebereik\", je moet zowel de waaden \"Van\" als \"Tot\" "
+"configureren voor het postcodebereik en \"Tot\" moet groter zijn dan "
+"\"Van\"."
 
 #. module: account
 #. odoo-python
@@ -9742,6 +9750,12 @@ msgstr "Negatieve waarde van bedragveld als betalingstype uitgaand is"
 #: model:ir.model.fields.selection,name:account.selection__res_company__early_pay_discount_computation__excluded
 msgid "Never"
 msgstr "Nooit"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr "Geneste groepen btw zijn niet toegestaan."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__new_journal_name
@@ -14181,6 +14195,16 @@ msgid "The company this distribution line belongs to."
 msgstr "Het bedrijf waartoe deze verdeelregel behoord."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country of the foreign VAT number could not be detected. Please assign a"
+" country to the fiscal position or set a country group"
+msgstr ""
+"Het land van het buitenlandse btw-nummer kon niet worden gedetecteerd. Wijs "
+"een land toe aan de fiscale positie of stel een landengroep in"
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "Het land waarvoor deze fiscale eenheid geldt."
@@ -16843,6 +16867,16 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr ""
+"Je kunt geen fiscale positie creëren met een land buiten de geselecteerde "
+"landengroep."
+
+#. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid ""

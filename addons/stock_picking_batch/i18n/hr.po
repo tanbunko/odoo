@@ -9,7 +9,6 @@
 # Ivan Marijanović <ivanm101@yahoo.com>, 2022
 # hrvoje sić <hrvoje.sic@gmail.com>, 2022
 # Vladimir Olujić <olujic.vladimir@storm.hr>, 2022
-# Vladimir Vrgoč, 2022
 # Ivica Dimjašević <ivica.dimjasevic@storm.hr>, 2022
 # Marko Carević <marko.carevic@live.com>, 2022
 # Tina Milas, 2022
@@ -18,6 +17,7 @@
 # Karolina Tonković <karolina.tonkovic@storm.hr>, 2022
 # Bole <bole@dajmi5.com>, 2022
 # Carlo Štefanac, 2023
+# Vladimir Vrgoč, 2024
 # Luka Carević <luka@uvid.hr>, 2024
 # 
 msgid ""
@@ -258,7 +258,7 @@ msgstr "Nedovršeni skupni prijenosi"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_move_line__batch_id
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking__batch_id
 msgid "Batch associated to this transfer"
-msgstr "Skup povezan sa ovim prenosom"
+msgstr "Skup povezan s ovim prijenosom"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -750,7 +750,7 @@ msgstr "Promijenjen status"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__state
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "State"
-msgstr "Županija/fed.država"
+msgstr "Status"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch

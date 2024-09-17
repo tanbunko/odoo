@@ -761,6 +761,35 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
     do {
         node = iterator.nextNode();
     } while (node && node !== range.startContainer && !(selectedTableCells.length && node === selectedTableCells[0]));
+    if (
+        node &&
+        !(selectedTableCells.length && node === selectedTableCells[0]) &&
+        !range.collapsed &&
+        node.nodeType === Node.ELEMENT_NODE &&
+        node.childNodes.length &&
+        range.startOffset &&
+        node.childNodes[range.startOffset - 1].nodeName === "BR"
+    ) {
+        // Handle the cases:
+        // <p>ab<br>[</p><p>cd</p>] => [p2, cd]
+        // <p>ab<br>[<br>cd</p><p>ef</p>] => [br2, cd, p2, ef]
+        const targetBr = node.childNodes[range.startOffset - 1];
+        while (node != targetBr) {
+            node = iterator.nextNode();
+        }
+        node = iterator.nextNode();
+    }
+    if (
+        node &&
+        !range.collapsed &&
+        node === range.startContainer &&
+        range.startOffset === nodeSize(node) &&
+        node.nextSibling &&
+        node.nextSibling.nodeName === "BR"
+    ) {
+        // Handle the case: <p>ab[<br>cd</p><p>ef</p>] => [br, cd, p2, ef]
+        node = iterator.nextNode();
+    }
     const traversedNodes = new Set([node, ...descendants(node)]);
     while (node && node !== range.endContainer) {
         node = iterator.nextNode();
@@ -771,9 +800,32 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
                     traversedNodes.add(selectedTd);
                     descendants(selectedTd).forEach(descendant => traversedNodes.add(descendant));
                 }
-            } else {
+            } else if (
+                !(
+                    // Handle the case: [<p>ab</p><p>cd<br>]ef</p> => [ab, p2, cd, br]
+                    node === range.endContainer &&
+                    range.endOffset === 0 &&
+                    !range.collapsed &&
+                    node.previousSibling &&
+                    node.previousSibling.nodeName === "BR"
+                )
+            ) {
                 traversedNodes.add(node);
             }
+        }
+    }
+    if (node) {
+        // Handle the cases:
+        // [<p>ab</p><p>cd<br>]</p> => [ab, p2, cd, br]
+        // [<p>ab</p><p>cd<br>]<br>ef</p> => [ab, p2, cd, br1]
+        for (const descendant of descendants(node)) {
+            if (
+                descendant.parentElement === node &&
+                childNodeIndex(descendant) >= range.endOffset
+            ) {
+                break;
+            }
+            traversedNodes.add(descendant);
         }
     }
     return [...traversedNodes];
@@ -875,7 +927,8 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
         correctTripleClick &&
         !endOffset &&
         (start !== end || startOffset !== endOffset) &&
-        (!beforeEnd || (beforeEnd.nodeType === Node.TEXT_NODE && !isVisibleStr(beforeEnd)))
+        (!beforeEnd || (beforeEnd.nodeType === Node.TEXT_NODE && !isVisibleStr(beforeEnd))) &&
+        !closestElement(endLeaf, 'table')
     ) {
         const previous = previousLeaf(endLeaf, editable, true);
         if (previous && closestElement(previous).isContentEditable) {
@@ -1922,6 +1975,7 @@ export function commonParentGet(node1, node2, root = undefined) {
 }
 
 export function getListMode(pnode) {
+    if (!["UL", "OL"].includes(pnode.tagName)) return;
     if (pnode.tagName == 'OL') return 'OL';
     return pnode.classList.contains('o_checklist') ? 'CL' : 'UL';
 }
@@ -1945,6 +1999,57 @@ export function insertListAfter(afterNode, mode, content = []) {
         }),
     );
     return list;
+}
+
+export function toggleList(node, mode, offset = 0) {
+    let pnode = node.closest('ul, ol');
+    if (!pnode) return;
+    const listMode = getListMode(pnode) + mode;
+    if (['OLCL', 'ULCL'].includes(listMode)) {
+        pnode.classList.add('o_checklist');
+        for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
+            if (li.style.listStyle !== 'none') {
+                li.style.listStyle = null;
+                if (!li.style.all) li.removeAttribute('style');
+            }
+        }
+        pnode = setTagName(pnode, 'UL');
+    } else if (['CLOL', 'CLUL'].includes(listMode)) {
+        toggleClass(pnode, 'o_checklist');
+        pnode = setTagName(pnode, mode);
+    } else if (['OLUL', 'ULOL'].includes(listMode)) {
+        pnode = setTagName(pnode, mode);
+    } else {
+        // toggle => remove list
+        let currNode = node;
+        while (currNode) {
+            currNode = currNode.oShiftTab(offset);
+        }
+        return;
+    }
+    return pnode;
+}
+
+/**
+ * Converts a list element and its nested elements to the specified list mode.
+ *
+ * @param {HTMLUListElement|HTMLOListElement|HTMLLIElement} node - HTML element
+ * representing a list or list item.
+ * @param {string} toMode - Target list mode
+ * @returns {HTMLUListElement|HTMLOListElement|HTMLLIElement} node - Modified
+ * list element after conversion.
+ */
+export function convertList(node, toMode) {
+    if (!["UL", "OL", "LI"].includes(node.nodeName)) return;
+    const listMode = getListMode(node);
+    if (listMode && toMode !== listMode) {
+        node = toggleList(node, toMode);
+    }
+    for (const child of node.childNodes) {
+        convertList(child, toMode);
+    }
+
+    return node;
 }
 
 export function toggleClass(node, className) {
@@ -2966,11 +3071,12 @@ export function getRangePosition(el, document, options = {}) {
         offset.left = marginLeft;
     }
 
-    if (options.parentContextRect) {
-        offset.left += options.parentContextRect.left;
-        offset.top += options.parentContextRect.top;
+    if (options.getContextFromParentRect) {
+        const parentContextRect = options.getContextFromParentRect();
+        offset.left += parentContextRect.left;
+        offset.top += parentContextRect.top;
         if (isRtl) {
-            offset.right += options.parentContextRect.left;
+            offset.right += parentContextRect.left;
         }
     }
 

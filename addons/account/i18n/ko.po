@@ -381,8 +381,9 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
-msgid "<b>Early Payment Discount applied.</b>"
-msgstr "<b>조기 납부 할인이 적용됩니다.</b>"
+msgid ""
+"<b>Early Payment Discount of %(payment_reference) has been applied.</b>"
+msgstr "<b>%(payment_reference)에 대한 선납 할인이 적용되었습니다.</b>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -7684,8 +7685,12 @@ msgstr "유효하지 않음"
 #. odoo-python
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
-msgstr "잘못된 \"우편번호 범위\"입니다. 적절히 구성해주십시오."
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
+msgstr ""
+"\"우편 번호 범위\"가 잘못되었습니다. 우편 번호 범위에 대해 \"출발지\" 및 \"도착지\" 값을 모두 구성해야 하며 \"도착지\"가"
+" \"출발지\"보다 커야 합니다."
 
 #. module: account
 #. odoo-python
@@ -9459,6 +9464,12 @@ msgstr "아웃바운드 payment_type인 경우 amount 필드의 음수 값"
 #: model:ir.model.fields.selection,name:account.selection__res_company__early_pay_discount_computation__excluded
 msgid "Never"
 msgstr "하지않음"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr "중첩된 세금 그룹은 사용할 수 없습니다."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__new_journal_name
@@ -13744,6 +13755,14 @@ msgid "The company this distribution line belongs to."
 msgstr "이 유통 항목이 속해 있는 회사입니다."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country of the foreign VAT number could not be detected. Please assign a"
+" country to the fiscal position or set a country group"
+msgstr "해외 VAT 번호의 국가를 확인할 수 없습니다. 재정 위치에 국가를 부여하거나 국가 그룹을 설정하세요."
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "이 세금 그룹이 적용되는 회사입니다."
@@ -16188,6 +16207,14 @@ msgstr "전표에 계좌 유형이 은행 계좌로 설정된 경우에는 미�
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr "선택한 국가 그룹 외부에 있는 국가에는 재정 포지션을 생성할 수 없습니다."
+
+#. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid ""

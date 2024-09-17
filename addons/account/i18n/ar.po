@@ -3,7 +3,7 @@
 # 	* account
 # 
 # Translators:
-# Mustafa Rawi <mustafa@cubexco.com>, 2022
+# Mustafa Rawi <mustafa@mrawi.com>, 2022
 # Talal Albahra <talal.albahra@outlook.com>, 2022
 # ِAD Market <admarketsa@gmail.com>, 2022
 # Ziani Ahmed (Zity), 2022
@@ -389,8 +389,9 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_register_form
-msgid "<b>Early Payment Discount applied.</b>"
-msgstr "<b>تم تطبيق خصم الدفع المبكر.</b>"
+msgid ""
+"<b>Early Payment Discount of %(payment_reference) has been applied.</b>"
+msgstr "<b>تم تطبيق خصم الدفع المبكر لـ %(payment_reference).</b> "
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -7829,8 +7830,12 @@ msgstr "غير صالح "
 #. odoo-python
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
-msgstr "نطاق الرمز البريدي خاطئ. الرجاء تكوينه بشكل صحيح. "
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
+msgstr ""
+"\"نطاق الرمز البريدي\" غير صالح، عليك تهيئة قِيَم \"من\" و \"إلى\" الخاصة "
+"بالرمز البريدي، ويجب أن تكون قيمة \"إلى\" أكبر من قيمة \"من\". "
 
 #. module: account
 #. odoo-python
@@ -9628,6 +9633,12 @@ msgstr "القيمة السالبة لحقل المبلغ إذا كان payment_
 #: model:ir.model.fields.selection,name:account.selection__res_company__early_pay_discount_computation__excluded
 msgid "Never"
 msgstr "مطلقًا"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr "لا يُسمح بالمجموعة المضمنة من الضرائب. "
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__new_journal_name
@@ -13999,6 +14010,16 @@ msgid "The company this distribution line belongs to."
 msgstr "الشركة التي ينتمي إليها هذا التوزيع. "
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country of the foreign VAT number could not be detected. Please assign a"
+" country to the fiscal position or set a country group"
+msgstr ""
+"تعذر رصد دولة رقم ضريبة القيمة المضافة الأجنبية. يُرجى تعيين دولة للوضع "
+"المالي أو قم بتعيين مجموعة دولة "
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "الدولة التي تكون هذه المجوعة الضريبية سارية فيها. "
@@ -16560,6 +16581,14 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr "لا يمكنك إنشاء وضع مالي بدولة خارج مجموعة الدول المحددة. "
+
+#. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid ""

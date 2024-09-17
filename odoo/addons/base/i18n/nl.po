@@ -7,8 +7,8 @@
 # Martin Trigaux, 2024
 # Wil Odoo, 2024
 # Jolien De Paepe, 2024
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
 # Larissa Manderfeld, 2024
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
 # Manon Rondou, 2024
 # 
 msgid ""
@@ -21046,6 +21046,12 @@ msgid "France - Accounting Reports"
 msgstr "Frankrijk - Boekhoudkundige rapportages"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
+"Frankrijk - Verplichte factuurvermeldingen toevoegen (Decreet nr. 2022-1299)"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
 msgid "France - FEC Export"
 msgstr "Frankrijk - FEC Export"
@@ -28629,6 +28635,16 @@ msgstr ""
 #, python-format
 msgid "Odoo is unable to merge the generated PDFs."
 msgstr "Odoo kan de gegenereerde PDF's niet samenvoegen."
+
+#. module: base
+#. odoo-python
+#: code:addons/base/models/ir_actions_report.py:0
+msgid ""
+"Odoo is unable to merge the generated PDFs because of {num_errors} corrupted"
+" file(s)"
+msgstr ""
+"Odoo kan de gegenereerde PDF's niet samenvoegen wegens {num_errors} "
+"corrupt(e) bestand(en)"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__padding
@@ -37289,6 +37305,12 @@ msgstr "Bekijk overerf modus"
 #: model:ir.module.module,summary:base.module_website_crm_livechat
 msgid "View livechat sessions for leads"
 msgstr "Bekijk livechat sessies voor leads"
+
+#. module: base
+#. odoo-python
+#: code:addons/base/models/ir_actions_report.py:0
+msgid "View Problematic Record(s)"
+msgstr "Problematische gegevens bekijken"
 
 #. module: base
 #. odoo-python
