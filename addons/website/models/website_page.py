@@ -91,6 +91,12 @@ class Page(models.Model):
         for page in self:
             page.website_url = page.url
 
+    @api.depends_context('uid')
+    def _compute_can_publish(self):
+        is_designer = self.env.user.has_group('website.group_website_designer')
+        for record in self:
+            record.can_publish = is_designer
+
     def _get_most_specific_pages(self):
         ''' Returns the most specific pages in self. '''
         ids = []
@@ -242,7 +248,7 @@ class Page(models.Model):
         )
         results = most_specific_pages.filtered_domain(domain)  # already sudo
 
-        if with_description and search:
+        if with_description and search and most_specific_pages:
             # Perform search in translations
             # TODO Remove when domains will support xml_translate fields
             query = sql.SQL("""
