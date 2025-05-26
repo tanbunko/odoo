@@ -2152,6 +2152,15 @@ class BaseModel(metaclass=MetaModel):
                             value, format=gb['display_format'],
                             locale=locale
                         )
+                    granularity = gb['granularity']
+                    # special case weeks because babel is broken *and*
+                    # ubuntu reverted a change so it's also inconsistent
+                    if granularity == 'week':
+                        year, week = date_utils.weeknumber(
+                            babel.Locale.parse(locale),
+                            value,
+                        )
+                        label = f"W{week} {year:04}"
                     data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
                     data.setdefault('__range', {})[gb['groupby']] = {'from': range_start, 'to': range_end}
                     d = [
@@ -2791,7 +2800,7 @@ class BaseModel(metaclass=MetaModel):
                 # field is translated to avoid converting its column to varchar
                 # and losing data
                 translate = next((
-                    field.args['translate'] for field in reversed(fields_) if 'translate' in field.args
+                    field._args__['translate'] for field in reversed(fields_) if 'translate' in field._args__
                 ), False)
                 if not translate:
                     # patch the field definition by adding an override
@@ -2801,7 +2810,7 @@ class BaseModel(metaclass=MetaModel):
                 cls._fields[name] = fields_[0]
             else:
                 Field = type(fields_[-1])
-                self._add_field(name, Field(_base_fields=fields_))
+                self._add_field(name, Field(_base_fields=tuple(fields_)))
 
         # 2. add manual fields
         if self.pool._init_modules:

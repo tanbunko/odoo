@@ -2125,7 +2125,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e(\+|-)?\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -2370,6 +2370,32 @@
             rows.push(row);
         }
         return rows;
+    }
+    function isSheetNameEqual(name1, name2) {
+        if (name1 === undefined || name2 === undefined) {
+            return false;
+        }
+        return (getUnquotedSheetName(name1.trim().toUpperCase()) ===
+            getUnquotedSheetName(name2.trim().toUpperCase()));
+    }
+    function getNextSheetName(existingNames, baseName = "Sheet") {
+        let i = 1;
+        let name = `${baseName}${i}`;
+        while (existingNames.includes(name)) {
+            name = `${baseName}${i}`;
+            i++;
+        }
+        return name;
+    }
+    function getDuplicateSheetName(nameToDuplicate, existingNames) {
+        let i = 1;
+        const baseName = _lt("Copy of %s", nameToDuplicate);
+        let name = baseName.toString();
+        while (existingNames.includes(name)) {
+            name = `${baseName} (${i})`;
+            i++;
+        }
+        return name;
     }
 
     /*
@@ -6078,10 +6104,13 @@
         sequence: 20,
         action: (env) => {
             const sheetIdFrom = env.model.getters.getActiveSheetId();
+            const sheetNameFrom = env.model.getters.getSheetName(sheetIdFrom);
             const sheetIdTo = env.model.uuidGenerator.smallUuid();
+            const sheetNameTo = env.model.getters.getDuplicateSheetName(sheetNameFrom);
             env.model.dispatch("DUPLICATE_SHEET", {
                 sheetId: sheetIdFrom,
                 sheetIdTo,
+                sheetNameTo,
             });
             env.model.dispatch("ACTIVATE_SHEET", { sheetIdFrom, sheetIdTo });
         },
@@ -6953,7 +6982,7 @@
         if (executed.type === "ADD_COLUMNS_ROWS") {
             return expandZoneOnInsertion(zone, executed.dimension === "COL" ? "left" : "top", executed.base, executed.position, executed.quantity);
         }
-        return { ...zone };
+        return zone;
     }
 
     /**
@@ -7383,7 +7412,8 @@
             }
         }
         else if (dataSets.length === 1) {
-            for (let i = 0; i < getData(getters, dataSets[0]).length; i++) {
+            const dataLength = getData(getters, dataSets[0]).length;
+            for (let i = 0; i < dataLength; i++) {
                 labels.formattedValues.push("");
                 labels.values.push("");
             }
@@ -17653,6 +17683,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         return value === null || value === undefined;
     }
     const getNeutral = { number: 0, string: "", boolean: false };
+    function areAlmostEqual(value1, value2, epsilon = 2e-16) {
+        return Math.abs(value1 - value2) < epsilon;
+    }
     const EQ = {
         description: _lt(`Equal.`),
         args: args(`
@@ -17668,6 +17701,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             if (typeof value2 === "string") {
                 value2 = value2.toUpperCase();
+            }
+            if (typeof value1 === "number" && typeof value2 === "number") {
+                return areAlmostEqual(value1, value2);
             }
             return value1 === value2;
         },
@@ -17703,6 +17739,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
             return applyRelationalOperator(value1, value2, (v1, v2) => {
+                if (typeof v1 === "number" && typeof v2 === "number") {
+                    return !areAlmostEqual(v1, v2) && v1 > v2;
+                }
                 return v1 > v2;
             });
         },
@@ -17719,6 +17758,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
             return applyRelationalOperator(value1, value2, (v1, v2) => {
+                if (typeof v1 === "number" && typeof v2 === "number") {
+                    return areAlmostEqual(v1, v2) || v1 > v2;
+                }
                 return v1 >= v2;
             });
         },
@@ -18415,7 +18457,13 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         return null;
     }
-    const separatorRegexp = /\w|\.|!|\$/;
+    /**
+      - \p{L} is for any letter (from any language)
+      - \p{N} is for any number
+      - the u flag at the end is for unicode, which enables the `\p{...}` syntax
+     */
+    const unicodeSymbolCharRegexp = /\p{L}|\p{N}|_|\.|!|\$/u;
+    const SYMBOL_CHARS = new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.!$");
     /**
      * A "Symbol" is just basically any word-like element that can appear in a
      * formula, which is not a string. So:
@@ -18455,7 +18503,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 };
             }
         }
-        while (chars[0] && chars[0].match(separatorRegexp)) {
+        while (chars[0] && (SYMBOL_CHARS.has(chars[0]) || chars[0].match(unicodeSymbolCharRegexp))) {
             result += chars.shift();
         }
         if (result.length) {
@@ -19588,8 +19636,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     break;
                 case "STOP_EDITION":
                     if (cmd.cancel) {
-                        this.cancelEditionAndActivateSheet();
                         this.resetContent();
+                        this.cancelEditionAndActivateSheet();
                     }
                     else {
                         this.stopEdition();
@@ -19604,8 +19652,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.replaceSelection(cmd.text);
                     break;
                 case "SELECT_FIGURE":
-                    this.cancelEditionAndActivateSheet();
                     this.resetContent();
+                    this.cancelEditionAndActivateSheet();
                     break;
                 case "ADD_COLUMNS_ROWS":
                     this.onAddElements(cmd);
@@ -19627,7 +19675,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         const { xc, sheetName: sheet } = splitReference(token.value);
                         const sheetName = sheet || this.getters.getSheetName(this.sheetId);
                         const activeSheetId = this.getters.getActiveSheetId();
-                        if (this.getters.getSheetName(activeSheetId) !== sheetName) {
+                        if (!isSheetNameEqual(this.getters.getSheetName(activeSheetId), sheetName)) {
                             return false;
                         }
                         const refRange = this.getters.getRangeFromSheetXC(activeSheetId, xc);
@@ -19664,8 +19712,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     const sheetIdExists = !!this.getters.tryGetSheet(this.sheetId);
                     if (!sheetIdExists && this.mode !== "inactive") {
                         this.sheetId = this.getters.getActiveSheetId();
-                        this.cancelEditionAndActivateSheet();
                         this.resetContent();
+                        this.cancelEditionAndActivateSheet();
                         this.ui.notifyUI({
                             type: "ERROR",
                             text: CELL_DELETED_MESSAGE,
@@ -21706,18 +21754,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     function useInterval(callback, delay) {
         let intervalId;
         const { setInterval, clearInterval } = window;
+        const pause = () => {
+            clearInterval(intervalId);
+            intervalId = undefined;
+        };
+        const safeCallback = () => {
+            try {
+                callback();
+            }
+            catch (e) {
+                pause();
+                throw e;
+            }
+        };
         owl.useEffect(() => {
-            intervalId = setInterval(callback, delay);
+            intervalId = setInterval(safeCallback, delay);
             return () => clearInterval(intervalId);
         }, () => [delay]);
         return {
-            pause: () => {
-                clearInterval(intervalId);
-                intervalId = undefined;
-            },
+            pause,
             resume: () => {
                 if (intervalId === undefined) {
-                    intervalId = setInterval(callback, delay);
+                    intervalId = setInterval(safeCallback, delay);
                 }
             },
         };
@@ -22124,7 +22182,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: 0;
     left: ${HEADER_WIDTH}px;
-    right: 0;
+    right: ${SCROLLBAR_WIDTH}px;
     height: ${HEADER_HEIGHT}px;
     &.o-dragging {
       cursor: grabbing;
@@ -22295,9 +22353,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     position: absolute;
     top: ${HEADER_HEIGHT}px;
     left: 0;
-    right: 0;
+    bottom: ${SCROLLBAR_WIDTH}px;
     width: ${HEADER_WIDTH}px;
-    height: calc(100% - ${HEADER_HEIGHT + SCROLLBAR_WIDTH}px);
     &.o-dragging {
       cursor: grabbing;
     }
@@ -23728,9 +23785,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     /** In XLSX color format (no #)  */
     const AUTO_COLOR = "000000";
     const XLSX_ICONSET_MAP = {
-        arrow: "3Arrows",
+        arrows: "3Arrows",
         smiley: "3Symbols",
-        dot: "3TrafficLights1",
+        dots: "3TrafficLights1",
     };
     const NAMESPACE = {
         styleSheet: "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
@@ -24119,6 +24176,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     };
     /** Map between legend position in XLSX file and human readable position  */
     const DRAWING_LEGEND_POSITION_CONVERSION_MAP = {
+        none: "none",
         b: "bottom",
         t: "top",
         l: "left",
@@ -25021,7 +25079,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         ({ xc, sheetName } = splitReference(reference));
         let rangeSheetIndex;
         if (sheetName) {
-            const index = data.sheets.findIndex((sheet) => sheet.name === sheetName);
+            const index = data.sheets.findIndex((sheet) => isSheetNameEqual(sheet.name, sheetName));
             if (index < 0) {
                 throw new Error("Unable to find a sheet with the name " + sheetName);
             }
@@ -25193,7 +25251,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             var _a;
             externalRefId = Number(externalRefId) - 1;
             cellRef = cellRef.replace(/\$/g, "");
-            const sheetIndex = data.externalBooks[externalRefId].sheetNames.findIndex((name) => name === sheetName);
+            const sheetIndex = data.externalBooks[externalRefId].sheetNames.findIndex((name) => isSheetNameEqual(name, sheetName));
             if (sheetIndex === -1) {
                 return match;
             }
@@ -25532,7 +25590,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      */
     function convertTableFormulaReferences(convertedSheets, xlsxSheets) {
         for (let tableSheet of convertedSheets) {
-            const tables = xlsxSheets.find((s) => s.sheetName === tableSheet.name).tables;
+            const tables = xlsxSheets.find((s) => isSheetNameEqual(s.sheetName, tableSheet.name)).tables;
             for (let table of tables) {
                 const tabRef = table.name + "[";
                 for (let sheet of convertedSheets) {
@@ -26296,7 +26354,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         ? "right"
                         : "left",
                     legendPosition: DRAWING_LEGEND_POSITION_CONVERSION_MAP[this.extractChildAttr(rootChartElement, "c:legendPos", "val", {
-                        default: "b",
+                        default: "none",
                     }).asString()],
                     stacked: barChartGrouping === "stacked",
                     fontColor: "000000",
@@ -27412,6 +27470,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         initialMessages = dropCommands(initialMessages, "SORT_CELLS");
         initialMessages = dropCommands(initialMessages, "SET_DECIMAL");
         initialMessages = fixChartDefinitions(data, initialMessages);
+        initialMessages = fixTranslatedDuplicateSheetName(data, initialMessages);
         return initialMessages;
     }
     /**
@@ -27511,6 +27570,40 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
         }
         return messages;
+    }
+    function fixTranslatedDuplicateSheetName(data, initialMessages) {
+        var _a;
+        const sheetNames = {};
+        for (const sheet of data.sheets || []) {
+            sheetNames[sheet.id] = sheet.name;
+        }
+        const messages = [];
+        for (const message of initialMessages) {
+            if (message.type === "REMOTE_REVISION") {
+                const commands = [];
+                for (const cmd of message.commands) {
+                    switch (cmd.type) {
+                        case "DUPLICATE_SHEET":
+                            cmd.sheetNameTo =
+                                (_a = cmd.sheetNameTo) !== null && _a !== void 0 ? _a : getDuplicateSheetName(sheetNames[cmd.sheetId], Object.values(sheetNames));
+                            break;
+                        case "CREATE_SHEET":
+                        case "RENAME_SHEET":
+                            sheetNames[cmd.sheetId] = cmd.name || getNextSheetName(Object.values(sheetNames));
+                            break;
+                    }
+                    commands.push(cmd);
+                }
+                messages.push({
+                    ...message,
+                    commands,
+                });
+            }
+            else {
+                messages.push(message);
+            }
+        }
+        return initialMessages;
     }
     // -----------------------------------------------------------------------------
     // Helpers
@@ -28764,9 +28857,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 : 0 /* CommandResult.Success */;
         }
         checkChartExists(cmd) {
-            return this.getters.getFigureSheetId(cmd.id)
-                ? 0 /* CommandResult.Success */
-                : 86 /* CommandResult.ChartDoesNotExist */;
+            return this.isChartDefined(cmd.id) ? 0 /* CommandResult.Success */ : 86 /* CommandResult.ChartDoesNotExist */;
         }
     }
     ChartPlugin.getters = [
@@ -30504,7 +30595,11 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     return this.checkValidations(cmd, this.checkSheetName, this.checkSheetPosition);
                 }
                 case "DUPLICATE_SHEET": {
-                    return this.sheets[cmd.sheetIdTo] ? 12 /* CommandResult.DuplicatedSheetId */ : 0 /* CommandResult.Success */;
+                    if (this.sheets[cmd.sheetIdTo])
+                        return 12 /* CommandResult.DuplicatedSheetId */;
+                    if (this.orderedSheetIds.map(this.getSheetName.bind(this)).includes(cmd.sheetNameTo))
+                        return 11 /* CommandResult.DuplicatedSheetName */;
+                    return 0 /* CommandResult.Success */;
                 }
                 case "MOVE_SHEET":
                     const currentIndex = this.orderedSheetIds.indexOf(cmd.sheetId);
@@ -30590,7 +30685,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     this.showSheet(cmd.sheetId);
                     break;
                 case "DUPLICATE_SHEET":
-                    this.duplicateSheet(cmd.sheetId, cmd.sheetIdTo);
+                    this.duplicateSheet(cmd.sheetId, cmd.sheetIdTo, cmd.sheetNameTo);
                     break;
                 case "DELETE_SHEET":
                     this.deleteSheet(this.sheets[cmd.sheetId]);
@@ -30730,7 +30825,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (name) {
                 const unquotedName = getUnquotedSheetName(name);
                 for (const key in this.sheetIdsMapName) {
-                    if (key.toUpperCase() === unquotedName.toUpperCase()) {
+                    if (isSheetNameEqual(key, unquotedName)) {
                         return this.sheetIdsMapName[key];
                     }
                 }
@@ -30814,14 +30909,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             return dimension === "COL" ? this.getNumberCols(sheetId) : this.getNumberRows(sheetId);
         }
         getNextSheetName(baseName = "Sheet") {
-            let i = 1;
             const names = this.orderedSheetIds.map(this.getSheetName.bind(this));
-            let name = `${baseName}${i}`;
-            while (names.includes(name)) {
-                name = `${baseName}${i}`;
-                i++;
-            }
-            return name;
+            return getNextSheetName(names, baseName);
         }
         getSheetSize(sheetId) {
             return {
@@ -30985,7 +31074,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         checkSheetName(cmd) {
             const { orderedSheetIds, sheets } = this;
             const name = cmd.name && cmd.name.trim().toLowerCase();
-            if (orderedSheetIds.find((id) => { var _a; return ((_a = sheets[id]) === null || _a === void 0 ? void 0 : _a.name.toLowerCase()) === name; })) {
+            if (orderedSheetIds.find((id) => { var _a; return isSheetNameEqual((_a = sheets[id]) === null || _a === void 0 ? void 0 : _a.name, name); })) {
                 return 11 /* CommandResult.DuplicatedSheetName */;
             }
             if (FORBIDDEN_IN_EXCEL_REGEX.test(name)) {
@@ -31049,9 +31138,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         showSheet(sheetId) {
             this.history.update("sheets", sheetId, "isVisible", true);
         }
-        duplicateSheet(fromId, toId) {
+        duplicateSheet(fromId, toId, toName) {
             const sheet = this.getSheet(fromId);
-            const toName = this.getDuplicateSheetName(sheet.name);
             const newSheet = deepCopy(sheet);
             newSheet.id = toId;
             newSheet.name = toName;
@@ -31083,15 +31171,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             this.history.update("sheetIdsMapName", sheetIdsMapName);
         }
         getDuplicateSheetName(sheetName) {
-            let i = 1;
             const names = this.orderedSheetIds.map(this.getSheetName.bind(this));
-            const baseName = _lt("Copy of %s", sheetName);
-            let name = baseName.toString();
-            while (names.includes(name)) {
-                name = `${baseName} (${i})`;
-                i++;
-            }
-            return name;
+            return getDuplicateSheetName(sheetName, names);
         }
         deleteSheet(sheet) {
             const name = sheet.name;
@@ -31378,6 +31459,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         "getSheetZone",
         "getPaneDivisions",
         "checkElementsIncludeAllNonFrozenHeaders",
+        "getDuplicateSheetName",
     ];
 
     /**
@@ -32446,12 +32528,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 for (let c = 0; c < width; c++) {
                     const origin = rowCells[c];
                     const position = { col: col + c, row: row + r, sheetId: sheetId };
-                    // TODO: refactor this part. the "Paste merge" action is also executed with
-                    // MOVE_RANGES in pasteFromCut. Adding a condition on the operation type here
-                    // is not appropriate
-                    if (this.operation !== "CUT") {
-                        this.pasteMergeIfExist(origin.position, position);
-                    }
+                    this.pasteMergeIfExist(origin.position, position, this.operation);
                     this.pasteCell(origin, position, this.operation, clipboardOptions);
                     if (shouldPasteCF) {
                         this.dispatch("PASTE_CONDITIONAL_FORMAT", {
@@ -32530,13 +32607,16 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * If the origin position given is the top left of a merge, merge the target
          * position.
          */
-        pasteMergeIfExist(origin, target) {
+        pasteMergeIfExist(origin, target, operation) {
             let { sheetId, col, row } = origin;
             const { col: mainCellColOrigin, row: mainCellRowOrigin } = this.getters.getMainCellPosition(sheetId, col, row);
             if (mainCellColOrigin === col && mainCellRowOrigin === row) {
                 const merge = this.getters.getMerge(sheetId, col, row);
                 if (!merge) {
                     return;
+                }
+                if (operation === "CUT") {
+                    this.dispatch("REMOVE_MERGE", { sheetId, target: [merge] });
                 }
                 ({ sheetId, col, row } = target);
                 this.dispatch("ADD_MERGE", {
@@ -35252,6 +35332,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         const { col, row } = this.getters.getNextVisibleCellPosition(cmd.sheetIdTo, 0, 0);
                         this.selectCell(col, row);
                     }
+                    const { col, row } = this.gridSelection.anchor.cell;
+                    this.moveClient({ sheetId: this.activeSheet.id, col, row });
                     break;
                 }
                 case "REMOVE_COLUMNS_ROWS": {
@@ -36213,10 +36295,8 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         }
         const target = [];
         for (const zone1 of cmd.target) {
-            for (const zone2 of executed.target) {
-                if (!overlap(zone1, zone2)) {
-                    target.push({ ...zone1 });
-                }
+            if (executed.target.every((zone2) => !overlap(zone1, zone2))) {
+                target.push(zone1);
             }
         }
         if (target.length) {
@@ -40868,7 +40948,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                         if (range.sheetId === cmd.sheetId) {
                             return { changeType: "CHANGE", range };
                         }
-                        if (cmd.name && range.invalidSheetName === cmd.name) {
+                        if (isSheetNameEqual(range.invalidSheetName, cmd.name)) {
                             const invalidSheetName = undefined;
                             const sheetId = cmd.sheetId;
                             const newRange = range.clone({ sheetId, invalidSheetName });
@@ -42463,10 +42543,14 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 continue;
             }
             const cfValueObjectNodes = cfValueObject.map((attrs) => escapeXml /*xml*/ `<cfvo ${formatAttributes(attrs)} />`);
+            const iconSetAttrs = [["iconSet", getIconSet(rule.icons)]];
+            if (isIconSetReversed(rule.icons)) {
+                iconSetAttrs.push(["reverse", "1"]);
+            }
             conditionalFormats.push(escapeXml /*xml*/ `
       <conditionalFormatting sqref="${range}">
         <cfRule ${formatAttributes(ruleAttributes)}>
-          <iconSet iconSet="${getIconSet(rule.icons)}">
+          <iconSet ${formatAttributes(iconSetAttrs)}>
             ${joinXmlNodes(cfValueObjectNodes)}
           </iconSet>
         </cfRule>
@@ -42484,9 +42568,21 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             ["stopIfTrue", cf.stopIfTrue ? 1 : 0],
         ];
     }
+    function isIconSetReversed(iconSet) {
+        const defaultIconSet = ICON_SETS[detectIconsType(iconSet)];
+        return iconSet.upper === defaultIconSet.bad && iconSet.lower === defaultIconSet.good;
+    }
     function getIconSet(iconSet) {
-        return XLSX_ICONSET_MAP[Object.keys(XLSX_ICONSET_MAP).find((key) => iconSet.upper.toLowerCase().startsWith(key)) ||
-            "dots"];
+        return XLSX_ICONSET_MAP[detectIconsType(iconSet)];
+    }
+    /**
+     * Partial detection based on "upper" point only.
+     * We support any arbitrary icon in the set, while excel doesn't allow
+     * mixing icons from different types.
+     */
+    function detectIconsType(iconSet) {
+        const type = Object.keys(ICON_SETS).find((type) => Object.values(ICON_SETS[type]).includes(iconSet.upper)) || "dots";
+        return type;
     }
     function thresholdAttributes(threshold, position) {
         const type = getExcelThresholdType(threshold.type, position);
@@ -43761,9 +43857,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.0.64';
-    __info__.date = '2025-03-07T11:30:25.466Z';
-    __info__.hash = '20def15';
+    __info__.version = '16.0.71';
+    __info__.date = '2025-05-13T17:55:53.089Z';
+    __info__.hash = '2ff9f1a';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);
