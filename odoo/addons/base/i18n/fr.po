@@ -15485,7 +15485,7 @@ msgstr "Vue de base"
 #: model:ir.actions.server,name:base.autovacuum_job_ir_actions_server
 #: model:ir.cron,cron_name:base.autovacuum_job
 msgid "Base: Auto-vacuum internal data"
-msgstr "Base : données internes de l'aspiration automatique"
+msgstr "Base : données internes du nettoyage automatique"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_web_grid
@@ -18141,7 +18141,7 @@ msgstr "D - FOURNITURE D'ÉLECTRICITÉ, DE GAZ, DE VAPEUR ET D'AIR CONDITIONNÉ"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_dhl
 msgid "DHL Express Shipping (Legacy)"
-msgstr ""
+msgstr "Expédition DHL Express (Legacy)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008
@@ -26344,7 +26344,7 @@ msgstr "Namibie"
 #: code:addons/base/models/ir_qweb_fields.py:0
 #, python-format
 msgid "Narrow"
-msgstr "Étroit"
+msgstr "Restreint"
 
 #. module: base
 #: model:res.country,name:base.nr
@@ -32997,6 +32997,9 @@ msgid ""
 " Please install the new \"DHL Express Shipping\" module and uninstall this "
 "one as soon as possible."
 msgstr ""
+"Il s'agit de l'ancienne intégration avec DHL Express qui n'est plus prise en"
+" charge. Veuillez installer le nouveau module \"Expédition DHL Express\" et "
+"désinstaller celui-ci dès que possible."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_fedex_rest
@@ -37956,7 +37959,7 @@ msgstr "Assistance du site web"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_livechat
 msgid "Website IM Livechat Helpdesk"
-msgstr "Assistance par discussion instantanée sur le site web "
+msgstr "Assistance Live Chat site web "
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_jitsi
