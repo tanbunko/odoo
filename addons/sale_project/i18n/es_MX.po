@@ -460,7 +460,7 @@ msgstr ""
 #: code:addons/sale_project/models/project.py:0
 #, python-format
 msgid "Portal Sale Order"
-msgstr ""
+msgstr "Orden de venta del portal"
 
 #. module: sale_project
 #. odoo-python
@@ -477,7 +477,7 @@ msgstr "Producto"
 #. module: sale_project
 #: model:ir.model,name:sale_project.model_product_product
 msgid "Product Variant"
-msgstr "Variante de producto"
+msgstr "Variante del producto"
 
 #. module: sale_project
 #: model:ir.model,name:sale_project.model_project_project

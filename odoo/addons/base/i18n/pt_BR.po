@@ -17540,7 +17540,7 @@ msgstr "D - FORNECIMENTO DE ELETRICIDADE, GÁS, VAPOR E AR CONDICIONADO"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_dhl
 msgid "DHL Express Shipping (Legacy)"
-msgstr ""
+msgstr "DHL Express Shipping (Legacy)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008
@@ -23971,7 +23971,7 @@ msgstr "Módulo de conexão entre pos_sale e pos_loyalty"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_es_edi_tbai_multi_refund
 msgid "Link one refund with multiple invoices"
-msgstr ""
+msgstr "Link one refund with multiple invoices"
 
 #. module: base
 #. odoo-python
@@ -31961,6 +31961,9 @@ msgid ""
 " Please install the new \"DHL Express Shipping\" module and uninstall this "
 "one as soon as possible."
 msgstr ""
+"This is the legacy integration with DHL Express that is no longer supported."
+" Please install the new \"DHL Express Shipping\" module and uninstall this "
+"one as soon as possible."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_fedex_rest
@@ -35059,7 +35062,7 @@ msgstr "Quinta"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_es_edi_tbai_multi_refund
 msgid "TicketBAI multi refund"
-msgstr ""
+msgstr "TicketBAI multi refund"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_livechat
